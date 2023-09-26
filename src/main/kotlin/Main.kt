@@ -1,26 +1,31 @@
 import java.io.File
-
-
+import java.io.FileWriter
+import java.io.BufferedReader
+import java.io.FileInputStream
+import java.io.InputStreamReader
 
 fun main() {
 
     fun loadAnimalsFromFile(filename: String): MutableList<Animal> {
         val animals = mutableListOf<Animal>()
         try {
-            val inputStream = Thread.currentThread().contextClassLoader.getResourceAsStream(filename)
-            inputStream?.bufferedReader()?.use { reader ->
-                reader.forEachLine { line ->
-                    val parts = line.split(";")
-                    if (parts.size == 6) {
-                        val animal = Animal(
-                            parts[0].trim(),
-                            parts[1].trim(),
-                            parts[2].trim().toInt(),
-                            parts[3].trim().toBoolean(),
-                            parts[4].trim(),
-                            parts[5].trim()
-                        )
-                        animals.add(animal)
+            FileInputStream(filename).use { fileInputStream ->
+                InputStreamReader(fileInputStream, Charsets.UTF_8).use { inputStreamReader ->
+                    BufferedReader(inputStreamReader).use { reader ->
+                        reader.forEachLine { line ->
+                            val parts = line.split(";")
+                            if (parts.size == 6) {
+                                val animal = Animal(
+                                    parts[0].trim(),
+                                    parts[1].trim(),
+                                    parts[2].trim().toInt(),
+                                    parts[3].trim().toBoolean(),
+                                    parts[4].trim(),
+                                    parts[5].trim()
+                                )
+                                animals.add(animal)
+                            }
+                        }
                     }
                 }
             }
@@ -33,7 +38,8 @@ fun main() {
     fun saveAnimalsToFile(filename: String, animals: List<Animal>) {
         try {
             val file = File(filename)
-            file.bufferedWriter().use { writer ->
+            file.writeText("")
+            FileWriter(file, true).use { writer ->
                 for (animal in animals) {
                     writer.write("${animal.animalType};${animal.name};${animal.legCount};${animal.isPredator};${animal.color};${animal.habitat}\n")
                 }
@@ -43,7 +49,7 @@ fun main() {
         }
     }
 
-    val filename = "animals.txt"
+    val filename = "C:\\Users\\А\\IdeaProjects\\zoo_Kotlin\\src\\main\\resources\\animals.txt"
     val animals = loadAnimalsFromFile(filename)
 
     fun printAllAnimals(animals: MutableList<Animal>){
@@ -59,7 +65,7 @@ fun main() {
                 val input = readlnOrNull()
                 if (input != null)
                 animal.name = input
-                println("Имя успешно изменено")
+                println("Имя успешно изменено\n")
             }
         }
     }
@@ -191,7 +197,7 @@ fun main() {
 
                 val newAnimal = Animal(animalType, name, legCount, isPredator, color, habitat)
                 animals.addAnimal(newAnimal)
-                println("Новое животное успешно добавлено")
+                println("Новое животное успешно добавлено\n")
                 saveAnimalsToFile(filename, animals)
             }
 
@@ -201,6 +207,7 @@ fun main() {
                 val nameToRemove = readlnOrNull()
                 if (nameToRemove != null) {
                     animals.removeByName(nameToRemove.trim())
+                    println("Животное успешно удалено\n")
                     saveAnimalsToFile(filename, animals)
                 }
             }
@@ -214,7 +221,6 @@ fun main() {
                 println("Неверная команда. Попробуйте еще раз")
             }
         }
-        saveAnimalsToFile(filename, animals)
     }
 }
 
