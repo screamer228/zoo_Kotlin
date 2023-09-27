@@ -3,8 +3,7 @@ import java.io.FileWriter
 import java.io.BufferedReader
 import java.io.FileInputStream
 import java.io.InputStreamReader
-
-fun main() {
+import java.util.*
 
     fun loadAnimalsFromFile(filename: String): MutableList<Animal> {
         val animals = mutableListOf<Animal>()
@@ -50,22 +49,43 @@ fun main() {
     }
 
     val filename = "C:\\Users\\А\\IdeaProjects\\zoo_Kotlin\\src\\main\\resources\\animals.txt"
+    //val projectDir = System.getProperty("user.dir")
+    //val relativePath = "zoo_Kotlin\\scr\\main\\resources\\animals.txt"
+    //val filename = "$projectDir\\$relativePath"
     val animals = loadAnimalsFromFile(filename)
 
-    fun printAllAnimals(animals: MutableList<Animal>){
-        for (animal in animals){
+    fun printAllAnimals(animals: MutableList<Animal>) {
+        for (animal in animals) {
             println(animal)
         }
     }
 
-    fun changeName(name: String){
+    fun existName(name: String): Boolean {
+        var result = false
+        for (animal in animals) {
+            if (animal.name == name) {
+                result = true
+                break
+            }
+        }
+        return result
+    }
+
+    fun changeName(name: String) {
         for (animal in animals) {
             if (animal.name == name) {
                 println("Введите новое имя")
-                val input = readlnOrNull()
-                if (input != null)
-                animal.name = input
-                println("Имя успешно изменено\n")
+                val input = readlnOrNull()?.trim()
+                if (input != null) {
+                    if (!existName(input)){     //проверка есть ли уже такое имя
+                        animal.name = name
+                        saveAnimalsToFile(filename, animals)
+                        println("Имя успешно изменено\n")
+                    }
+                    else {
+                        print("Животное с таким именем уже существует!")
+                    }
+                }
             }
         }
     }
@@ -80,6 +100,8 @@ fun main() {
         addAll(filteredList)
     }
 
+fun main() {
+
     while (true) {
         println("Список доступных команд:\nвывести\nвывести по признаку\nизменить имя\nдобавить\nудалить по имени\nвыход\n")
         println("Введите команду:")
@@ -91,10 +113,9 @@ fun main() {
 
             "изменить имя" -> {
                 println("Введите имя животного")
-                val input = readlnOrNull()
+                val input = readlnOrNull()?.trim()
                 if (input != null) {
                     changeName(input)
-                    saveAnimalsToFile(filename, animals)
                 }
             }
 
@@ -181,34 +202,64 @@ fun main() {
             }
 
             "добавить" -> {
-                println("Введите данные для нового животного:")
-                println("Имя:")
-                val name = readLine()
-                println("Тип:")
-                val animalType = readLine()
-                println("Количество ног:")
-                val legCount = readLine()?.toIntOrNull() ?: 0
-                println("Хищник (true/false):")
-                val isPredator = readLine()?.toBoolean() ?: false
-                println("Цвет:")
-                val color = readLine()
-                println("Ареал обитания:")
-                val habitat = readLine()
-
-                val newAnimal = Animal(animalType, name, legCount, isPredator, color, habitat)
-                animals.addAnimal(newAnimal)
-                println("Новое животное успешно добавлено\n")
-                saveAnimalsToFile(filename, animals)
+                while (true) {
+                    println("Введите данные для нового животного (волк, тигр, медведь, пингвин, кенгуру):")
+                    println("Тип:")
+                    val animalType = readlnOrNull()?.lowercase(Locale.getDefault())
+                    if (animalType !in listOf("волк", "тигр", "медведь", "пингвин", "кенгуру")) {
+                        println("Неверный тип животного. Введите один из допустимых")
+                        continue
+                    }
+                    println("Имя:")
+                    val name = readlnOrNull()
+                    println("Количество ног:")
+                    val legCount = readlnOrNull()?.toIntOrNull() ?: 0
+                    println("Хищник (true/false):")
+                    val isPredator = readlnOrNull()?.toBoolean() ?: false
+                    //if (!listOf("true", "false").contains(element = isPredator)) {
+                    //    println("Неверный ... животного. Введите один из допустимых")
+                    //    continue
+                    //}
+                    println("Цвет (черный, серый, желтый, белый):")
+                    val color = readlnOrNull()?.lowercase(Locale.getDefault())
+                    if (color !in listOf("черный", "серый", "желтый", "белый")) {
+                        println("Неверный цвет животного. Введите один из допустимых")
+                        continue
+                    }
+                    println("Ареал обитания (Евразия, Северная Америка, Южная Америка, Африка, Австралия, Антарктида):")
+                    val habitat = readlnOrNull()
+                    if (habitat !in listOf(
+                            "евразия",
+                            "северная Америка",
+                            "южная Америка",
+                            "африка",
+                            "австралия",
+                            "антарктида"
+                        )
+                    ) {
+                        println("Неверный ареал обитания животного. Введите один из допустимых")
+                        continue
+                    }
+                    val newAnimal = Animal(animalType, name, legCount, isPredator, color, habitat)
+                    animals.addAnimal(newAnimal)
+                    saveAnimalsToFile(filename, animals)
+                    println("Животное успешно добавлено")
+                    println("Хотите добавить еще одно животное? (да/нет): ")
+                    val answer = readlnOrNull()?.trim()?.lowercase(Locale.getDefault())
+                    if (answer != "да") {
+                        break
+                    }
+                }
             }
 
             "удалить" -> {
                 // Здесь можно запросить имя животного для удаления и удалить его из списка
                 println("Введите имя животного для удаления:")
-                val nameToRemove = readlnOrNull()
+                val nameToRemove = readlnOrNull()?.trim()
                 if (nameToRemove != null) {
-                    animals.removeByName(nameToRemove.trim())
-                    println("Животное успешно удалено\n")
+                    animals.removeByName(nameToRemove)
                     saveAnimalsToFile(filename, animals)
+                    println("Животное успешно удалено\n")
                 }
             }
 
