@@ -49,9 +49,13 @@ import java.util.*
     }
 
     val filename = "C:\\Users\\А\\IdeaProjects\\zoo_Kotlin\\src\\main\\resources\\animals.txt"
+
+//хз, но видит файл только по абсолютному пути, пробовал по разному
+
     //val projectDir = System.getProperty("user.dir")
     //val relativePath = "zoo_Kotlin\\scr\\main\\resources\\animals.txt"
     //val filename = "$projectDir\\$relativePath"
+
     val animals = loadAnimalsFromFile(filename)
 
     fun printAllAnimals(animals: MutableList<Animal>) {
